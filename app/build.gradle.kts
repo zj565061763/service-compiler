@@ -8,7 +8,6 @@ dependencies {
     implementation(project(":app_lib"))
     implementation(project(":app_module_a"))
     implementation(project(":app_module_b"))
-    implementation(project(":lib"))
     ksp(project(":lib"))
 }
 
