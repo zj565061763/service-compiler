@@ -1,12 +1,21 @@
 pluginManagement {
     val kotlinVersion: String by settings
     val kspVersion: String by settings
+
     plugins {
-        id("com.google.devtools.ksp") version kspVersion
-        kotlin("jvm") version kotlinVersion
+        kotlin("jvm") version kotlinVersion apply false
+        id("com.google.devtools.ksp") version kspVersion apply false
     }
+
     repositories {
         gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
         mavenCentral()
     }
 }

@@ -11,6 +11,10 @@ dependencies {
     ksp(project(":lib"))
 }
 
+kotlin {
+    jvmToolchain(8)
+}
+
 ksp {
     arg("FSERVICE_MODULE_NAME", "FSERVICE_MODULE_MAIN")
 }
