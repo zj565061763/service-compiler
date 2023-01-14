@@ -3,6 +3,7 @@ package com.sd.lib.service.compiler.processor
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSNode
+import com.sd.lib.service.compiler.LibVersion
 import com.sd.lib.service.compiler.OptionsKeyModuleName
 import com.sd.lib.service.compiler.OptionsValueModuleMain
 
@@ -21,6 +22,6 @@ abstract class BaseProcessor(
         get() = OptionsValueModuleMain == moduleName
 
     fun log(message: String, symbol: KSNode? = null) {
-        env.logger.warn("${javaClass.simpleName} $message", symbol)
+        env.logger.warn("$LibVersion ${javaClass.simpleName} $message", symbol)
     }
 }
