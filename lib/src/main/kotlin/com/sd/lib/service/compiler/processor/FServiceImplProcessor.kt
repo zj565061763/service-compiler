@@ -41,12 +41,12 @@ class FServiceImplProcessor(
 
         if (isMainModule) {
             _mapMainModule.let { map ->
-                val key = key.qualifiedName!!.asString()
-                val value = value.qualifiedName!!.asString()
-                val holder = map[key] ?: hashSetOf<String>().also {
-                    map[key] = it
+                val keyString = key.qualifiedName!!.asString()
+                val valueString = value.qualifiedName!!.asString()
+                val holder = map[keyString] ?: hashSetOf<String>().also {
+                    map[keyString] = it
                 }
-                holder.add(value)
+                holder.add(valueString)
             }
         }
     }
