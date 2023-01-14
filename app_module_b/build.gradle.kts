@@ -4,7 +4,6 @@ plugins {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
     implementation(project(":app_lib"))
     ksp(project(":lib"))
 }
