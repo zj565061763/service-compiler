@@ -238,7 +238,7 @@ private fun findServiceInterface(source: KSClassDeclaration): KSClassDeclaration
     }
 
     return checkNotNull(ret) {
-        "Interface marked with annotation @${FService.simpleName} was not found in ${source.qualifiedName!!.asString()}"
+        "Interface marked with annotation @${FService.simpleName} was not found in ${source.qualifiedName!!.asString()} super types"
     }
 }
 
