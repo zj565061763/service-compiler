@@ -1,10 +1,7 @@
 package com.sd.lib.service.compiler.processor
 
 import com.google.devtools.ksp.*
-import com.google.devtools.ksp.processing.Resolver
-import com.google.devtools.ksp.processing.SymbolProcessor
-import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
-import com.google.devtools.ksp.processing.SymbolProcessorProvider
+import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.*
 import com.sd.lib.service.compiler.mapping.LibPackage
 import com.sd.lib.service.compiler.mapping.impl.FService
@@ -208,7 +205,7 @@ class FServiceImplProcessor(
             .addType(typeSpec)
             .build()
 
-        fileSpec.writeTo(env.codeGenerator, true)
+        fileSpec.writeTo(env.codeGenerator, Dependencies.ALL_FILES)
     }
 }
 
