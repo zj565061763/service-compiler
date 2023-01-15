@@ -1,12 +1,4 @@
 pluginManagement {
-    val kotlinVersion: String by settings
-    val kspVersion: String by settings
-
-    plugins {
-        kotlin("jvm") version kotlinVersion apply false
-        id("com.google.devtools.ksp") version kspVersion apply false
-    }
-
     repositories {
         gradlePluginPortal()
         mavenCentral()
@@ -21,7 +13,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "service-compiler"
-
 include(":app")
 include(":app_common")
 include(":app_module_a")

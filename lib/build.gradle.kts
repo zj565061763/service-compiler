@@ -1,13 +1,11 @@
-val kspVersion: String by project
-
 plugins {
     kotlin("jvm")
     `maven-publish`
 }
 
 dependencies {
-    implementation("com.squareup:kotlinpoet-ksp:1.12.0")
-    implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
+    implementation(libs.google.devtools.ksp.api)
+    implementation(libs.squareup.kotlinpoet.ksp)
 }
 
 sourceSets.main {
