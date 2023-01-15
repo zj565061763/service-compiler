@@ -24,7 +24,6 @@ class FServiceImplProcessorProvider : SymbolProcessorProvider {
 class FServiceImplProcessor(
     env: SymbolProcessorEnvironment
 ) : BaseProcessor(env) {
-    private var _resolver: Resolver? = null
 
     private val _mapModuleDeclaration: MutableMap<KSClassDeclaration, MutableSet<KSClassDeclaration>> = hashMapOf()
     private val _mapMainModule: MutableMap<String, MutableSet<String>> = hashMapOf()
@@ -62,23 +61,15 @@ class FServiceImplProcessor(
 
     @OptIn(KspExperimental::class)
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        _resolver = resolver
-
         val symbols = resolver.getSymbolsWithAnnotation(FServiceImpl.fullName).toList()
         val ret = symbols.filter { !it.validate() }
-
-        val serviceInterfaceDeclaration = resolver.getClassDeclarationByName(FService.fullName)
-            ?: return ret
 
         log("---------- $moduleName process symbols:${symbols.size} ----------")
 
         symbols.forEach { annotated ->
             if (annotated is KSClassDeclaration && annotated.validate()) {
-                findServiceInterface(
-                    source = annotated,
-                    service = serviceInterfaceDeclaration,
-                ).also {
-                    addMapModuleDeclaration(it, annotated)
+                findServiceInterface(annotated).also { service ->
+                    addMapModuleDeclaration(service, annotated)
                 }
             }
         }
@@ -86,7 +77,7 @@ class FServiceImplProcessor(
         if (isMainModule) {
             resolver.getDeclarationsFromPackage(LibPackage.registerModule).forEach { declaration ->
                 if (declaration is KSClassDeclaration) {
-                    with(declaration.serviceInfo()) {
+                    with(declaration.getServiceInfo()) {
                         first?.let { serviceName ->
                             log("add module sub ${declaration.simpleName.asString()} impl:${second.size}")
                             addMapFinal(serviceName, second)
@@ -221,27 +212,24 @@ class FServiceImplProcessor(
     }
 }
 
-private fun findServiceInterface(source: KSClassDeclaration, service: KSClassDeclaration): KSClassDeclaration {
+private fun findServiceInterface(source: KSClassDeclaration): KSClassDeclaration {
     require(source.classKind == ClassKind.CLASS) { "@${FServiceImpl.simpleName} should be used in ClassKind.CLASS" }
     require(!source.isAbstract()) { "@${FServiceImpl.simpleName} should not be used in abstract class" }
 
-    var result: KSClassDeclaration? = null
+    var ret: KSClassDeclaration? = null
 
-    val serviceType = service.asStarProjectedType()
-    var current: KSNode = source
+    var current = source
     while (true) {
-        if (current !is KSClassDeclaration) break
-        if (!serviceType.isAssignableFrom(current.asStarProjectedType())) break
+        val superInfo = current.getSuperInfo()
+        val interfaces = superInfo.second
+        if (interfaces.isEmpty()) break
 
-        val superInfo = current.superInfo()
-        for (item in superInfo.second) {
-            val itemType = item.asStarProjectedType()
-            if (serviceType == itemType) continue
-            if (serviceType.isAssignableFrom(itemType)) {
-                if (result == null) {
-                    result = item
+        for (item in interfaces) {
+            if (item.isAnnotationPresent(FService.fullName)) {
+                if (ret == null) {
+                    ret = item
                 } else {
-                    error("More than one implementation of ${FService.simpleName} was found in ${source.qualifiedName!!.asString()}")
+                    error("More than one service interface present in ${source.qualifiedName!!.asString()}")
                 }
             }
         }
@@ -249,17 +237,17 @@ private fun findServiceInterface(source: KSClassDeclaration, service: KSClassDec
         current = superInfo.first ?: break
     }
 
-    return checkNotNull(result) {
-        "Implementation of ${FService.simpleName} was not found in ${source.qualifiedName!!.asString()}"
+    return checkNotNull(ret) {
+        "Interface marked with annotation @${FService.simpleName} was not found in ${source.qualifiedName!!.asString()}"
     }
 }
 
-private fun KSClassDeclaration.superInfo(): Pair<KSClassDeclaration?, List<KSClassDeclaration>> {
+private fun KSClassDeclaration.getSuperInfo(): Pair<KSClassDeclaration?, List<KSClassDeclaration>> {
     val superTypes = superTypes.toList()
     if (superTypes.isEmpty()) return (null to listOf())
 
     var parent: KSClassDeclaration? = null
-    val listInterface = mutableListOf<KSClassDeclaration>()
+    val interfaces = mutableListOf<KSClassDeclaration>()
 
     for (item in superTypes) {
         val declaration = item.resolve().declaration
@@ -270,24 +258,35 @@ private fun KSClassDeclaration.superInfo(): Pair<KSClassDeclaration?, List<KSCla
                 check(parent == null)
                 parent = declaration
             }
-            ClassKind.INTERFACE -> listInterface.add(declaration)
+            ClassKind.INTERFACE -> interfaces.add(declaration)
             else -> {}
         }
     }
 
-    return parent to listInterface
+    return (parent to interfaces)
 }
 
-private fun KSClassDeclaration.serviceInfo(): Pair<String?, Set<String>> {
+private fun KSAnnotated.isAnnotationPresent(fullName: String): Boolean {
+    val annotations = annotations.toList()
+    if (annotations.isEmpty()) return false
+    for (item in annotations) {
+        val declaration = item.annotationType.resolve().declaration
+        val qualifiedName = declaration.qualifiedName ?: continue
+        if (qualifiedName.asString() == fullName) return true
+    }
+    return false
+}
+
+private fun KSClassDeclaration.getServiceInfo(): Pair<String?, Set<String>> {
     val properties = getDeclaredProperties()
 
     val service = properties.find { it.simpleName.asString() == "service" } ?: return (null to setOf())
-    val serviceName = service.findServiceProviderAnnotationName() ?: return (null to setOf())
+    val serviceName = service.getServiceNamePropertyAnnotationName() ?: return (null to setOf())
 
     val listImplName = mutableSetOf<String>()
     properties.forEach {
         if (it.simpleName.asString().startsWith("impl")) {
-            it.findServiceProviderAnnotationName()?.let { name ->
+            it.getServiceNamePropertyAnnotationName()?.let { name ->
                 listImplName.add(name)
             }
         }
@@ -295,7 +294,7 @@ private fun KSClassDeclaration.serviceInfo(): Pair<String?, Set<String>> {
     return (serviceName to listImplName)
 }
 
-private fun KSPropertyDeclaration.findServiceProviderAnnotationName(): String? {
+private fun KSPropertyDeclaration.getServiceNamePropertyAnnotationName(): String? {
     val annotation = annotations.find {
         val qualifiedName = it.annotationType.resolve().declaration.qualifiedName?.asString()
         qualifiedName == ServiceNameProperty.fullName

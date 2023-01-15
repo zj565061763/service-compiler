@@ -4,3 +4,7 @@ package com.sd.lib.service
 annotation class ServiceNameProperty(
     val name: String,
 )
+
+interface ServiceImplClassProvider {
+    fun classes(): List<String>
+}
