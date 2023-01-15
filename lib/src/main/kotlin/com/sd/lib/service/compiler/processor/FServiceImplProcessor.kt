@@ -101,13 +101,14 @@ class FServiceImplProcessor(
     override fun finish() {
         super.finish()
         log("---------- $moduleName finish ----------")
-        createModuleFiles()
         if (isMainModule) {
             _mapMainModule.forEach { item ->
                 log("add module main ${item.key} impl:${item.value.size}")
                 addMapFinal(item.key, item.value)
             }
             createFinalFiles()
+        } else {
+            createModuleFiles()
         }
     }
 
