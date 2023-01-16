@@ -113,7 +113,7 @@ private fun KSClassDeclaration.getServiceInfo(): ServiceInfo? {
 
     val module = annotation.fGetArgument(ModuleServiceInfo.module.name) ?: error("member '${ModuleServiceInfo.module}' not found")
     val moduleValue = (module.value?.toString() ?: "").also {
-        if (it.isEmpty()) error("member '${ModuleServiceInfo.module}' value is empty.")
+        if (it.isEmpty()) error("member '${ModuleServiceInfo.module}' value is empty")
     }
 
     val service = annotation.fGetArgument(ModuleServiceInfo.service.name) ?: error("member '${ModuleServiceInfo.service}' not found")
