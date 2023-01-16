@@ -9,7 +9,7 @@ import com.sd.lib.service.compiler.LibVersion
 import com.sd.lib.service.compiler.OptionsKeyModuleName
 import com.sd.lib.service.compiler.OptionsValueModuleMain
 
-abstract class BaseProcessor(
+internal abstract class BaseProcessor(
     val env: SymbolProcessorEnvironment,
     private val main: Boolean = false,
 ) : SymbolProcessor {

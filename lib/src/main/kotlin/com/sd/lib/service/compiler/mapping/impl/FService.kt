@@ -2,5 +2,5 @@ package com.sd.lib.service.compiler.mapping.impl
 
 import com.sd.lib.service.compiler.mapping.LibClassMapping
 
-object FService : LibClassMapping(simpleName = "FService") {
+internal object FService : LibClassMapping(simpleName = "FService") {
 }

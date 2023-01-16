@@ -26,7 +26,7 @@ class FServiceImplProcessorProvider : SymbolProcessorProvider {
     }
 }
 
-class FServiceImplProcessor(
+internal class FServiceImplProcessor(
     env: SymbolProcessorEnvironment
 ) : BaseProcessor(env) {
 
