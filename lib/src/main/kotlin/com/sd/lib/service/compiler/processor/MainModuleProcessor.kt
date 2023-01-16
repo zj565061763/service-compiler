@@ -26,7 +26,7 @@ class MainModuleProcessor(
     private val _serviceHolder: MutableMap<String, MutableSet<String>> = hashMapOf()
 
     @OptIn(KspExperimental::class)
-    override fun process(resolver: Resolver): List<KSAnnotated> {
+    override fun processImpl(resolver: Resolver): List<KSAnnotated> {
         if (!isMainModule) return listOf()
 
         val symbols = resolver.getDeclarationsFromPackage(LibPackage.registerModule).toList()

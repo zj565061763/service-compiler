@@ -42,7 +42,7 @@ class FServiceImplProcessor(
         }
     }
 
-    override fun process(resolver: Resolver): List<KSAnnotated> {
+    override fun processImpl(resolver: Resolver): List<KSAnnotated> {
         val symbols = resolver.getSymbolsWithAnnotation(FServiceImpl.fullName).toList()
         val ret = symbols.filter { !it.validate() }
 

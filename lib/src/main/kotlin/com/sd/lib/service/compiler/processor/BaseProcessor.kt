@@ -1,7 +1,9 @@
 package com.sd.lib.service.compiler.processor
 
+import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
+import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSNode
 import com.sd.lib.service.compiler.LibVersion
 import com.sd.lib.service.compiler.OptionsKeyModuleName
@@ -24,4 +26,10 @@ abstract class BaseProcessor(
     fun log(message: String, symbol: KSNode? = null) {
         env.logger.warn("$LibVersion ${javaClass.simpleName} $message", symbol)
     }
+
+    final override fun process(resolver: Resolver): List<KSAnnotated> {
+        return processImpl(resolver)
+    }
+
+    abstract fun processImpl(resolver: Resolver): List<KSAnnotated>
 }
