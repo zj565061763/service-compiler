@@ -8,6 +8,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSFile
 import com.sd.lib.service.compiler.fIsAnnotationPresent
 import com.sd.lib.service.compiler.fReplaceDot
 import com.sd.lib.service.compiler.mapping.LibPackage
@@ -85,7 +86,11 @@ internal class FServiceImplProcessor(
             .addType(typeSpec)
             .build()
 
-        fileSpec.writeTo(env.codeGenerator, true)
+        val listKsFile = mutableListOf<KSFile>()
+        service.containingFile?.let { listKsFile.add(it) }
+        listImpl.mapNotNullTo(listKsFile) { it.containingFile }
+
+        fileSpec.writeTo(env.codeGenerator, true, listKsFile)
     }
 
     override fun errorImpl() {
