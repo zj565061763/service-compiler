@@ -31,5 +31,19 @@ abstract class BaseProcessor(
         return processImpl(resolver)
     }
 
+    final override fun onError() {
+        super.onError()
+        errorImpl()
+    }
+
+    final override fun finish() {
+        super.finish()
+        finishImpl()
+    }
+
     abstract fun processImpl(resolver: Resolver): List<KSAnnotated>
+
+    protected open fun errorImpl() {}
+
+    protected open fun finishImpl() {}
 }

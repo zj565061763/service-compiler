@@ -59,15 +59,15 @@ class MainModuleProcessor(
         }
     }
 
-    override fun onError() {
-        super.onError()
+    override fun errorImpl() {
+        super.errorImpl()
         if (!isMainModule) return
-        log("---------- $moduleName onError ----------")
+        log("---------- $moduleName error ----------")
         _serviceHolder.clear()
     }
 
-    override fun finish() {
-        super.finish()
+    override fun finishImpl() {
+        super.finishImpl()
         if (!isMainModule) return
         log("---------- $moduleName finish ----------")
         _serviceHolder.forEach { item ->

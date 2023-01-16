@@ -59,14 +59,14 @@ class FServiceImplProcessor(
         return ret
     }
 
-    override fun onError() {
-        super.onError()
-        log("---------- $moduleName onError ----------")
+    override fun errorImpl() {
+        super.errorImpl()
+        log("---------- $moduleName error ----------")
         _mapModule.clear()
     }
 
-    override fun finish() {
-        super.finish()
+    override fun finishImpl() {
+        super.finishImpl()
         log("---------- $moduleName finish ----------")
         _mapModule.forEach { item ->
             createModuleFile(
