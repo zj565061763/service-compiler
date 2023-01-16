@@ -1,13 +1,30 @@
 package com.sd.lib.service.compiler.mapping
 
-internal object FService : LibClass(simpleName = "FService")
+import com.squareup.kotlinpoet.ClassName
 
-internal object FServiceImpl : LibClass("FServiceImpl")
+internal object LibPackage {
+    const val main = "com.sd.lib.service"
 
-internal object ModuleServiceInfo : LibClass("ModuleServiceInfo") {
-    val module = LibProperty(name = "module")
-    val service = LibProperty(name = "service")
-    val impl = LibProperty(name = "impl")
+    const val register = "$main.register"
+
+    const val registerModule = "$register.module"
 }
 
-internal object ServiceImplClassProvider : LibClass(simpleName = "ServiceImplClassProvider")
+internal open class LibClass(
+    val simpleName: String,
+) {
+    val packageName: String = LibPackage.main
+    val fullName: String = "$packageName.$simpleName"
+}
+
+internal data class LibProperty(
+    val name: String
+) {
+    override fun toString(): String {
+        return name
+    }
+}
+
+internal fun LibClass.className(): ClassName {
+    return ClassName(packageName, simpleName)
+}
