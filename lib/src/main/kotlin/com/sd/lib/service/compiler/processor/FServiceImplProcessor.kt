@@ -1,15 +1,24 @@
 package com.sd.lib.service.compiler.processor
 
-import com.google.devtools.ksp.*
-import com.google.devtools.ksp.processing.*
-import com.google.devtools.ksp.symbol.*
+import com.google.devtools.ksp.isAbstract
+import com.google.devtools.ksp.processing.Resolver
+import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
+import com.google.devtools.ksp.processing.SymbolProcessorProvider
+import com.google.devtools.ksp.symbol.ClassKind
+import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.validate
+import com.sd.lib.service.compiler.fIsAnnotationPresent
+import com.sd.lib.service.compiler.fReplaceDot
 import com.sd.lib.service.compiler.mapping.LibPackage
 import com.sd.lib.service.compiler.mapping.impl.FService
 import com.sd.lib.service.compiler.mapping.impl.FServiceImpl
 import com.sd.lib.service.compiler.mapping.impl.ModuleServiceInfo
-import com.sd.lib.service.compiler.mapping.impl.ServiceImplClassProvider
-import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.ksp.writeTo
 
 class FServiceImplProcessorProvider : SymbolProcessorProvider {
@@ -22,41 +31,17 @@ class FServiceImplProcessor(
     env: SymbolProcessorEnvironment
 ) : BaseProcessor(env) {
 
-    private val _mapModuleDeclaration: MutableMap<KSClassDeclaration, MutableSet<KSClassDeclaration>> = hashMapOf()
-    private val _mapMainModule: MutableMap<String, MutableSet<String>> = hashMapOf()
+    private val _mapModule: MutableMap<KSClassDeclaration, MutableSet<KSClassDeclaration>> = hashMapOf()
 
-    private val _mapFinal: MutableMap<String, MutableSet<String>> = hashMapOf()
-
-    private fun addMapModuleDeclaration(key: KSClassDeclaration, value: KSClassDeclaration) {
-        _mapModuleDeclaration.let { map ->
+    private fun addMapModule(key: KSClassDeclaration, value: KSClassDeclaration) {
+        _mapModule.let { map ->
             val holder = map[key] ?: hashSetOf<KSClassDeclaration>().also {
                 map[key] = it
             }
             holder.add(value)
         }
-
-        if (isMainModule) {
-            _mapMainModule.let { map ->
-                val keyString = key.qualifiedName!!.asString()
-                val valueString = value.qualifiedName!!.asString()
-                val holder = map[keyString] ?: hashSetOf<String>().also {
-                    map[keyString] = it
-                }
-                holder.add(valueString)
-            }
-        }
     }
 
-    private fun addMapFinal(key: String, values: Set<String>) {
-        _mapFinal.let { map ->
-            val holder = map[key] ?: hashSetOf<String>().also {
-                map[key] = it
-            }
-            holder.addAll(values)
-        }
-    }
-
-    @OptIn(KspExperimental::class)
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val symbols = resolver.getSymbolsWithAnnotation(FServiceImpl.fullName).toList()
         val ret = symbols.filter { !it.validate() }
@@ -66,20 +51,7 @@ class FServiceImplProcessor(
         symbols.forEach { annotated ->
             if (annotated is KSClassDeclaration && annotated.validate()) {
                 findServiceInterface(annotated).also { service ->
-                    addMapModuleDeclaration(service, annotated)
-                }
-            }
-        }
-
-        if (isMainModule) {
-            resolver.getDeclarationsFromPackage(LibPackage.registerModule).forEach { declaration ->
-                if (declaration is KSClassDeclaration) {
-                    with(declaration.getServiceInfo()) {
-                        first?.let { serviceName ->
-                            log("add module sub ${declaration.simpleName.asString()} impl:${second.size}")
-                            addMapFinal(serviceName, second)
-                        }
-                    }
+                    addMapModule(service, annotated)
                 }
             }
         }
@@ -90,28 +62,13 @@ class FServiceImplProcessor(
     override fun onError() {
         super.onError()
         log("---------- $moduleName onError ----------")
-        _mapModuleDeclaration.clear()
-        _mapMainModule.clear()
-        _mapFinal.clear()
+        _mapModule.clear()
     }
 
     override fun finish() {
         super.finish()
         log("---------- $moduleName finish ----------")
-        if (isMainModule) {
-            _mapMainModule.forEach { item ->
-                log("add module main ${item.key} impl:${item.value.size}")
-                addMapFinal(item.key, item.value)
-            }
-            createFinalFiles()
-        } else {
-            createModuleFiles()
-        }
-    }
-
-    private fun createModuleFiles() {
-        val map = _mapModuleDeclaration
-        map.forEach { item ->
+        _mapModule.forEach { item ->
             createModuleFile(
                 service = item.key,
                 listImpl = item.value,
@@ -120,12 +77,10 @@ class FServiceImplProcessor(
     }
 
     private fun createModuleFile(
-        /** FService子接口 */
         service: KSClassDeclaration,
-        /** FService子接口的实现类 */
         listImpl: Set<KSClassDeclaration>,
     ) {
-        val filename = service.qualifiedName!!.asString().replaceDot() + "_$moduleName"
+        val filename = service.qualifiedName!!.asString().fReplaceDot() + "_$moduleName"
         log("createModuleFile $filename impl:${listImpl.size}")
 
         val typeSpec = TypeSpec.classBuilder(filename)
@@ -144,51 +99,6 @@ class FServiceImplProcessor(
 
         fileSpec.writeTo(env.codeGenerator, true)
     }
-
-    private fun createFinalFiles() {
-        val map = _mapFinal
-        map.forEach { item ->
-            createFinalFile(
-                service = item.key,
-                listImpl = item.value,
-            )
-        }
-    }
-
-    private fun createFinalFile(
-        /** FService子接口 */
-        service: String,
-        /** FService子接口的实现类 */
-        listImpl: Set<String>,
-    ) {
-        val filename = service.replaceDot()
-        log("createFinalFile $filename impl:${listImpl.size}")
-
-        val typeSpec = TypeSpec.classBuilder(filename)
-            .addModifiers(KModifier.INTERNAL)
-            .addSuperinterface(ServiceImplClassProvider.className)
-            .addFunction(
-                FunSpec.builder("classes")
-                    .addModifiers(KModifier.OVERRIDE)
-                    .returns(LIST.parameterizedBy(STRING))
-                    .addCode("return listOf(\n")
-                    .apply {
-                        listImpl.forEach {
-                            addCode("  \"$it\"")
-                            addCode(",\n")
-                        }
-                    }
-                    .addCode(")")
-                    .build()
-            )
-            .build()
-
-        val fileSpec = FileSpec.builder(LibPackage.register, filename)
-            .addType(typeSpec)
-            .build()
-
-        fileSpec.writeTo(env.codeGenerator, Dependencies.ALL_FILES)
-    }
 }
 
 private fun findServiceInterface(source: KSClassDeclaration): KSClassDeclaration {
@@ -204,7 +114,7 @@ private fun findServiceInterface(source: KSClassDeclaration): KSClassDeclaration
         if (interfaces.isEmpty()) break
 
         for (item in interfaces) {
-            if (item.isAnnotationPresent(FService.fullName)) {
+            if (item.fIsAnnotationPresent(FService.fullName)) {
                 if (ret == null) {
                     ret = item
                 } else {
@@ -243,46 +153,4 @@ private fun KSClassDeclaration.getSuperInfo(): Pair<KSClassDeclaration?, List<KS
     }
 
     return (parent to interfaces)
-}
-
-private fun KSAnnotated.isAnnotationPresent(fullName: String): Boolean {
-    val annotations = annotations.toList()
-    if (annotations.isEmpty()) return false
-    for (item in annotations) {
-        val declaration = item.annotationType.resolve().declaration
-        val qualifiedName = declaration.qualifiedName ?: continue
-        if (qualifiedName.asString() == fullName) return true
-    }
-    return false
-}
-
-private fun KSClassDeclaration.getServiceInfo(): Pair<String?, Set<String>> {
-    val annotation = fGetAnnotation(ModuleServiceInfo.fullName) ?: return (null to setOf())
-
-    val serviceArgument = annotation.fGetValue("service") ?: error("member 'service' not found.")
-    val serviceArgumentValue = serviceArgument.value?.toString() ?: ""
-    if (serviceArgumentValue.isEmpty()) error("member 'service' value is empty.")
-
-    val implArgument = annotation.fGetValue("impl") ?: error("member 'impl' not found.")
-    val implArgumentValue = implArgument.value?.toString() ?: ""
-    if (implArgumentValue.isEmpty()) error("member 'impl' value is empty.")
-
-    val implNames = implArgumentValue.split(",").toSet()
-    return (serviceArgumentValue to implNames)
-}
-
-private fun KSClassDeclaration.fGetAnnotation(fullName: String): KSAnnotation? {
-    return annotations.find {
-        fullName == it.annotationType.resolve().declaration.qualifiedName?.asString()
-    }
-}
-
-private fun KSAnnotation.fGetValue(name: String): KSValueArgument? {
-    return arguments.find {
-        it.name?.asString() == name
-    }
-}
-
-private fun String.replaceDot(): String {
-    return this.replace(".", "_")
 }
