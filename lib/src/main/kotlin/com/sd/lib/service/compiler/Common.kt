@@ -19,7 +19,7 @@ fun KSAnnotated.fGetAnnotation(fullName: String): KSAnnotation? {
     }
 }
 
-fun KSAnnotation.fGetValue(name: String): KSValueArgument? {
+fun KSAnnotation.fGetArgument(name: String): KSValueArgument? {
     return arguments.find {
         it.name?.asString() == name
     }

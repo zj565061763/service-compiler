@@ -4,7 +4,7 @@ import com.google.devtools.ksp.*
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.*
 import com.sd.lib.service.compiler.fGetAnnotation
-import com.sd.lib.service.compiler.fGetValue
+import com.sd.lib.service.compiler.fGetArgument
 import com.sd.lib.service.compiler.fReplaceDot
 import com.sd.lib.service.compiler.mapping.LibPackage
 import com.sd.lib.service.compiler.mapping.impl.ModuleServiceInfo
@@ -127,15 +127,15 @@ class MainModuleProcessor(
 private fun KSClassDeclaration.getServiceInfo(): ServiceInfo? {
     val annotation = fGetAnnotation(ModuleServiceInfo.fullName) ?: return null
 
-    val module = annotation.fGetValue("module") ?: error("member 'module' not found.")
+    val module = annotation.fGetArgument("module") ?: error("member 'module' not found.")
     val moduleValue = module.value?.toString() ?: ""
     if (moduleValue.isEmpty()) error("member 'module' value is empty.")
 
-    val service = annotation.fGetValue("service") ?: error("member 'service' not found.")
+    val service = annotation.fGetArgument("service") ?: error("member 'service' not found.")
     val serviceValue = service.value?.toString() ?: ""
     if (serviceValue.isEmpty()) error("member 'service' value is empty.")
 
-    val impl = annotation.fGetValue("impl") ?: error("member 'impl' not found.")
+    val impl = annotation.fGetArgument("impl") ?: error("member 'impl' not found.")
     val implValue = impl.value?.toString() ?: ""
     if (implValue.isEmpty()) return null
 
