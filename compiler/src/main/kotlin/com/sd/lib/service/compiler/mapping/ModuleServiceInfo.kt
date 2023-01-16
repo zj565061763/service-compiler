@@ -1,7 +1,4 @@
-package com.sd.lib.service.compiler.mapping.impl
-
-import com.sd.lib.service.compiler.mapping.LibClass
-import com.sd.lib.service.compiler.mapping.LibProperty
+package com.sd.lib.service.compiler.mapping
 
 internal object ModuleServiceInfo : LibClass("ModuleServiceInfo") {
     val module = LibProperty(name = "module")

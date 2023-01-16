@@ -11,11 +11,7 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
 import com.sd.lib.service.compiler.fIsAnnotationPresent
 import com.sd.lib.service.compiler.fReplaceDot
-import com.sd.lib.service.compiler.mapping.LibPackage
-import com.sd.lib.service.compiler.mapping.className
-import com.sd.lib.service.compiler.mapping.impl.FService
-import com.sd.lib.service.compiler.mapping.impl.FServiceImpl
-import com.sd.lib.service.compiler.mapping.impl.ModuleServiceInfo
+import com.sd.lib.service.compiler.mapping.*
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.KModifier

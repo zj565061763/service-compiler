@@ -7,9 +7,9 @@ import com.sd.lib.service.compiler.fGetAnnotation
 import com.sd.lib.service.compiler.fGetArgument
 import com.sd.lib.service.compiler.fReplaceDot
 import com.sd.lib.service.compiler.mapping.LibPackage
+import com.sd.lib.service.compiler.mapping.ModuleServiceInfo
+import com.sd.lib.service.compiler.mapping.ServiceImplClassProvider
 import com.sd.lib.service.compiler.mapping.className
-import com.sd.lib.service.compiler.mapping.impl.ModuleServiceInfo
-import com.sd.lib.service.compiler.mapping.impl.ServiceImplClassProvider
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.writeTo
