@@ -23,8 +23,7 @@ class MainModuleProcessor(
     env: SymbolProcessorEnvironment
 ) : BaseProcessor(env) {
 
-    private val _mapFinal: MutableMap<String, MutableSet<String>> = hashMapOf()
-
+    private val _serviceHolder: MutableMap<String, MutableSet<String>> = hashMapOf()
 
     @OptIn(KspExperimental::class)
     override fun process(resolver: Resolver): List<KSAnnotated> {
@@ -37,24 +36,24 @@ class MainModuleProcessor(
 
         symbols.forEach {
             if (it is KSClassDeclaration && it.validate()) {
-                addMapFinalFromModule(it)
+                addServiceFromModule(it)
             }
         }
 
         return ret
     }
 
-    private fun addMapFinalFromModule(declaration: KSClassDeclaration) {
+    private fun addServiceFromModule(declaration: KSClassDeclaration) {
         with(declaration.getServiceInfo()) {
             first?.let { serviceName ->
                 log("add module ${declaration.simpleName.asString()} impl:${second.size}")
-                addMapFinal(serviceName, second)
+                addService(serviceName, second)
             }
         }
     }
 
-    private fun addMapFinal(key: String, values: Set<String>) {
-        _mapFinal.let { map ->
+    private fun addService(key: String, values: Set<String>) {
+        _serviceHolder.let { map ->
             val holder = map[key] ?: hashSetOf<String>().also {
                 map[key] = it
             }
@@ -66,14 +65,14 @@ class MainModuleProcessor(
         super.onError()
         if (!isMainModule) return
         log("---------- $moduleName onError ----------")
-        _mapFinal.clear()
+        _serviceHolder.clear()
     }
 
     override fun finish() {
         super.finish()
         if (!isMainModule) return
         log("---------- $moduleName finish ----------")
-        _mapFinal.forEach { item ->
+        _serviceHolder.forEach { item ->
             createFinalFile(
                 service = item.key,
                 listImpl = item.value,
