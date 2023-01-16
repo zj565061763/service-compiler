@@ -28,17 +28,13 @@ class MainModuleProcessor(
     @OptIn(KspExperimental::class)
     override fun processImpl(resolver: Resolver): List<KSAnnotated> {
         val symbols = resolver.getDeclarationsFromPackage(LibPackage.registerModule).toList()
-        val ret = symbols.filter { !it.validate() }
-
         log("---------- $moduleName process symbols:${symbols.size} ----------")
-
         symbols.forEach {
-            if (it.validate() && it is KSClassDeclaration) {
+            if (it is KSClassDeclaration) {
                 addServiceFromModule(it)
             }
         }
-
-        return ret
+        return listOf()
     }
 
     private fun addServiceFromModule(declaration: KSClassDeclaration) {
