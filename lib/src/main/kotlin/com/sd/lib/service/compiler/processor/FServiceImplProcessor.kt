@@ -31,7 +31,6 @@ internal class FServiceImplProcessor(
 ) : BaseProcessor(env) {
 
     private val _serviceHolder: MutableMap<KSClassDeclaration, MutableSet<KSClassDeclaration>> = hashMapOf()
-    private val _createdHolder: MutableSet<KSClassDeclaration> = hashSetOf()
 
     override fun processImpl(resolver: Resolver): List<KSAnnotated> {
         val symbols = resolver.getSymbolsWithAnnotation(FServiceImpl.fullName).toList()
@@ -43,7 +42,6 @@ internal class FServiceImplProcessor(
                 }
             }
         }
-        createFiles()
         return listOf()
     }
 
@@ -58,14 +56,11 @@ internal class FServiceImplProcessor(
 
     private fun createFiles() {
         for ((key, value) in _serviceHolder) {
-            if (_createdHolder.contains(key)) continue
-            _createdHolder.add(key)
             createFile(
                 service = key,
                 listImpl = value,
             )
         }
-        _serviceHolder.clear()
     }
 
     private fun createFile(
@@ -101,6 +96,7 @@ internal class FServiceImplProcessor(
     override fun finishImpl() {
         super.finishImpl()
         log("---------- $moduleName finish ----------")
+        createFiles()
     }
 }
 
