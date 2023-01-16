@@ -10,17 +10,3 @@ class LoginServiceApp : LoginService {
         logMsg { "$this login" }
     }
 }
-
-@FServiceImpl(name = "App1")
-class LoginServiceApp1 : LoginService {
-    override fun login() {
-        logMsg { "$this login" }
-    }
-}
-
-@FServiceImpl(name = "App2")
-class LoginServiceApp2 : LoginService {
-    override fun login() {
-        logMsg { "$this login" }
-    }
-}
