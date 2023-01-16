@@ -26,7 +26,7 @@ internal abstract class BaseProcessor(
     private val isMainModule: Boolean
         get() = OptionsValueModuleMain == moduleName
 
-    val resolver: Resolver? get() = _resolver
+    val resolver: Resolver get() = checkNotNull(_resolver)
 
     fun log(message: String, symbol: KSNode? = null) {
         env.logger.warn("$LibVersion ${javaClass.simpleName} $message", symbol)
