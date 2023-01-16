@@ -1,5 +1,7 @@
 package com.sd.lib.service.compiler.mapping
 
+import com.squareup.kotlinpoet.ClassName
+
 internal object LibPackage {
     const val main = "com.sd.lib.service"
 
@@ -21,4 +23,8 @@ internal data class LibProperty(
     override fun toString(): String {
         return name
     }
+}
+
+internal fun LibClass.className(): ClassName {
+    return ClassName(packageName, simpleName)
 }

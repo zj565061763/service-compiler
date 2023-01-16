@@ -3,11 +3,11 @@ package com.sd.lib.service.compiler.processor
 import com.google.devtools.ksp.*
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.*
-import com.sd.lib.service.compiler.className
 import com.sd.lib.service.compiler.fGetAnnotation
 import com.sd.lib.service.compiler.fGetArgument
 import com.sd.lib.service.compiler.fReplaceDot
 import com.sd.lib.service.compiler.mapping.LibPackage
+import com.sd.lib.service.compiler.mapping.className
 import com.sd.lib.service.compiler.mapping.impl.ModuleServiceInfo
 import com.sd.lib.service.compiler.mapping.impl.ServiceImplClassProvider
 import com.squareup.kotlinpoet.*
