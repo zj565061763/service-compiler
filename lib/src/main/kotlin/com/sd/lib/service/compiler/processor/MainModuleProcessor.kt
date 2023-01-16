@@ -35,7 +35,7 @@ class MainModuleProcessor(
         log("---------- $moduleName process symbols:${symbols.size} ----------")
 
         symbols.forEach {
-            if (it is KSClassDeclaration && it.validate()) {
+            if (it.validate() && it is KSClassDeclaration) {
                 addServiceFromModule(it)
             }
         }
