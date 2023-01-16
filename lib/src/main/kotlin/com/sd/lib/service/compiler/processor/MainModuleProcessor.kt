@@ -110,15 +110,17 @@ internal class MainModuleProcessor(
 private fun KSClassDeclaration.getServiceInfo(): ServiceInfo? {
     val annotation = fGetAnnotation(ModuleServiceInfo.fullName) ?: return null
 
-    val module = annotation.fGetArgument("module") ?: error("member 'module' not found.")
-    val moduleValue = module.value?.toString() ?: ""
-    if (moduleValue.isEmpty()) error("member 'module' value is empty.")
+    val module = annotation.fGetArgument("module") ?: error("member 'module' not found")
+    val moduleValue = (module.value?.toString() ?: "").also {
+        if (it.isEmpty()) error("member 'module' value is empty.")
+    }
 
-    val service = annotation.fGetArgument("service") ?: error("member 'service' not found.")
-    val serviceValue = service.value?.toString() ?: ""
-    if (serviceValue.isEmpty()) error("member 'service' value is empty.")
+    val service = annotation.fGetArgument("service") ?: error("member 'service' not found")
+    val serviceValue = (service.value?.toString() ?: "").also {
+        if (it.isEmpty()) error("member 'service' value is empty")
+    }
 
-    val impl = annotation.fGetArgument("impl") ?: error("member 'impl' not found.")
+    val impl = annotation.fGetArgument("impl") ?: error("member 'impl' not found")
     val implValue = impl.value?.toString() ?: ""
     if (implValue.isEmpty()) return null
 
