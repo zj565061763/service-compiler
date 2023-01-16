@@ -30,16 +30,7 @@ class FServiceImplProcessor(
     env: SymbolProcessorEnvironment
 ) : BaseProcessor(env) {
 
-    private val _mapModule: MutableMap<KSClassDeclaration, MutableSet<KSClassDeclaration>> = hashMapOf()
-
-    private fun addMapModule(key: KSClassDeclaration, value: KSClassDeclaration) {
-        _mapModule.let { map ->
-            val holder = map[key] ?: hashSetOf<KSClassDeclaration>().also {
-                map[key] = it
-            }
-            holder.add(value)
-        }
-    }
+    private val _serviceHolder: MutableMap<KSClassDeclaration, MutableSet<KSClassDeclaration>> = hashMapOf()
 
     override fun processImpl(resolver: Resolver): List<KSAnnotated> {
         val symbols = resolver.getSymbolsWithAnnotation(FServiceImpl.fullName).toList()
@@ -47,17 +38,25 @@ class FServiceImplProcessor(
         symbols.forEach {
             if (it is KSClassDeclaration) {
                 findServiceInterface(it).also { service ->
-                    addMapModule(service, it)
+                    addService(service, it)
                 }
             }
         }
         return listOf()
     }
 
+    private fun addService(key: KSClassDeclaration, value: KSClassDeclaration) {
+        _serviceHolder.let { map ->
+            val holder = map[key] ?: hashSetOf<KSClassDeclaration>().also {
+                map[key] = it
+            }
+            holder.add(value)
+        }
+    }
+
     override fun errorImpl() {
         super.errorImpl()
         log("---------- $moduleName error ----------")
-        _mapModule.clear()
     }
 
     override fun finishImpl() {
@@ -67,7 +66,7 @@ class FServiceImplProcessor(
     }
 
     private fun createModuleFiles() {
-        _mapModule.forEach { item ->
+        _serviceHolder.forEach { item ->
             createServiceFile(
                 service = item.key,
                 listImpl = item.value,
