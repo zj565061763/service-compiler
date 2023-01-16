@@ -6,8 +6,8 @@ import com.google.devtools.ksp.symbol.*
 import com.sd.lib.service.compiler.mapping.LibPackage
 import com.sd.lib.service.compiler.mapping.impl.FService
 import com.sd.lib.service.compiler.mapping.impl.FServiceImpl
+import com.sd.lib.service.compiler.mapping.impl.ModuleServiceInfo
 import com.sd.lib.service.compiler.mapping.impl.ServiceImplClassProvider
-import com.sd.lib.service.compiler.mapping.impl.ServiceNameProperty
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.writeTo
@@ -130,30 +130,12 @@ class FServiceImplProcessor(
 
         val typeSpec = TypeSpec.classBuilder(filename)
             .addModifiers(KModifier.INTERNAL)
-            .addProperty(
-                PropertySpec.builder("service", STRING)
-                    .initializer("%S", "")
-                    .addAnnotation(
-                        AnnotationSpec.builder(ServiceNameProperty.className)
-                            .addMember("name = %S", service.qualifiedName!!.asString())
-                            .build()
-                    )
+            .addAnnotation(
+                AnnotationSpec.builder(ModuleServiceInfo.className)
+                    .addMember("service = %S", service.qualifiedName!!.asString())
+                    .addMember("impl = %S", listImpl.joinToString(separator = ",") { it.qualifiedName!!.asString() })
                     .build()
             )
-            .apply {
-                listImpl.forEachIndexed { index, item ->
-                    addProperty(
-                        PropertySpec.builder("impl$index", STRING)
-                            .initializer("%S", "")
-                            .addAnnotation(
-                                AnnotationSpec.builder(ServiceNameProperty.className)
-                                    .addMember("name = %S", item.qualifiedName!!.asString())
-                                    .build()
-                            )
-                            .build()
-                    )
-                }
-            }
             .build()
 
         val fileSpec = FileSpec.builder(LibPackage.registerModule, filename)
@@ -275,31 +257,30 @@ private fun KSAnnotated.isAnnotationPresent(fullName: String): Boolean {
 }
 
 private fun KSClassDeclaration.getServiceInfo(): Pair<String?, Set<String>> {
-    val properties = getDeclaredProperties()
+    val annotation = fGetAnnotation(ModuleServiceInfo.fullName) ?: return (null to setOf())
 
-    val service = properties.find { it.simpleName.asString() == "service" } ?: return (null to setOf())
-    val serviceName = service.getServiceNamePropertyAnnotationName() ?: return (null to setOf())
+    val serviceArgument = annotation.fGetValue("service") ?: error("member 'service' not found.")
+    val serviceArgumentValue = serviceArgument.value?.toString() ?: ""
+    if (serviceArgumentValue.isEmpty()) error("member 'service' value is empty.")
 
-    val listImplName = mutableSetOf<String>()
-    properties.forEach {
-        if (it.simpleName.asString().startsWith("impl")) {
-            it.getServiceNamePropertyAnnotationName()?.let { name ->
-                listImplName.add(name)
-            }
-        }
-    }
-    return (serviceName to listImplName)
+    val implArgument = annotation.fGetValue("impl") ?: error("member 'impl' not found.")
+    val implArgumentValue = implArgument.value?.toString() ?: ""
+    if (implArgumentValue.isEmpty()) error("member 'impl' value is empty.")
+
+    val implNames = implArgumentValue.split(",").toSet()
+    return (serviceArgumentValue to implNames)
 }
 
-private fun KSPropertyDeclaration.getServiceNamePropertyAnnotationName(): String? {
-    val annotation = annotations.find {
-        val qualifiedName = it.annotationType.resolve().declaration.qualifiedName?.asString()
-        qualifiedName == ServiceNameProperty.fullName
-    } ?: return null
+private fun KSClassDeclaration.fGetAnnotation(fullName: String): KSAnnotation? {
+    return annotations.find {
+        fullName == it.annotationType.resolve().declaration.qualifiedName?.asString()
+    }
+}
 
-    return annotation.arguments.find {
-        it.name?.asString() == "name"
-    }!!.value!!.toString().also { check(it.isNotEmpty()) }
+private fun KSAnnotation.fGetValue(name: String): KSValueArgument? {
+    return arguments.find {
+        it.name?.asString() == name
+    }
 }
 
 private fun String.replaceDot(): String {

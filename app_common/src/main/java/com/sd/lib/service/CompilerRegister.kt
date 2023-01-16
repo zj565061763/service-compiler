@@ -1,8 +1,9 @@
 package com.sd.lib.service
 
-@Target(AnnotationTarget.PROPERTY)
-annotation class ServiceNameProperty(
-    val name: String,
+@Target(AnnotationTarget.CLASS)
+annotation class ModuleServiceInfo(
+    val service: String,
+    val impl: String,
 )
 
 interface ServiceImplClassProvider {
