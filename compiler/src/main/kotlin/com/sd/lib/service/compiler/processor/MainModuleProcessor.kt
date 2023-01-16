@@ -25,6 +25,7 @@ internal class MainModuleProcessor(
 ) : BaseProcessor(env, main = true) {
 
     private val _serviceHolder: MutableMap<String, MutableSet<String>> = hashMapOf()
+    private val _dependencyHolder: MutableMap<String, MutableSet<KSClassDeclaration>> = hashMapOf()
 
     @OptIn(KspExperimental::class)
     override fun processImpl(resolver: Resolver): List<KSAnnotated> {
@@ -41,7 +42,17 @@ internal class MainModuleProcessor(
     private fun addServiceFromModule(declaration: KSClassDeclaration) {
         declaration.getServiceInfo()?.let {
             log("(${it.module}) (${it.service}) (impl:${it.implNames.size})")
+            addDependency(it.service, declaration)
             addService(it.service, it.implNames)
+        }
+    }
+
+    private fun addDependency(service: String, declaration: KSClassDeclaration) {
+        _dependencyHolder.let { map ->
+            val holder = map[service] ?: hashSetOf<KSClassDeclaration>().also {
+                map[service] = it
+            }
+            holder.add(declaration)
         }
     }
 
@@ -70,30 +81,18 @@ internal class MainModuleProcessor(
         val filename = service.fReplaceDot()
         log("createFinalFile $filename impl:${listImpl.size}")
 
-        val typeSpec = TypeSpec.classBuilder(filename)
-            .addModifiers(KModifier.INTERNAL)
-            .addSuperinterface(ServiceImplClassProvider.className())
-            .addFunction(
-                FunSpec.builder("classes")
-                    .addModifiers(KModifier.OVERRIDE)
-                    .returns(LIST.parameterizedBy(STRING))
-                    .addCode("return listOf(\n")
-                    .apply {
-                        listImpl.forEach {
-                            addCode("  \"$it\"")
-                            addCode(",\n")
-                        }
-                    }
-                    .addCode(")")
-                    .build()
-            )
-            .build()
+        val typeSpec = TypeSpec.classBuilder(filename).addModifiers(KModifier.INTERNAL).addSuperinterface(ServiceImplClassProvider.className())
+            .addFunction(FunSpec.builder("classes").addModifiers(KModifier.OVERRIDE).returns(LIST.parameterizedBy(STRING)).addCode("return listOf(\n").apply {
+                listImpl.forEach {
+                    addCode("  \"$it\"")
+                    addCode(",\n")
+                }
+            }.addCode(")").build()).build()
 
-        val fileSpec = FileSpec.builder(LibPackage.register, filename)
-            .addType(typeSpec)
-            .build()
+        val fileSpec = FileSpec.builder(LibPackage.register, filename).addType(typeSpec).build()
 
-        fileSpec.writeTo(env.codeGenerator, true)
+        val listKsFile = _dependencyHolder[service]!!.mapNotNull { it.containingFile }
+        fileSpec.writeTo(env.codeGenerator, true, listKsFile)
     }
 
     override fun errorImpl() {
