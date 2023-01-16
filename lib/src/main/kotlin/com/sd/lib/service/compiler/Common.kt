@@ -13,13 +13,13 @@ internal fun KSAnnotated.fIsAnnotationPresent(fullName: String): Boolean {
     return fGetAnnotation(fullName) != null
 }
 
-fun KSAnnotated.fGetAnnotation(fullName: String): KSAnnotation? {
+internal fun KSAnnotated.fGetAnnotation(fullName: String): KSAnnotation? {
     return annotations.find {
         fullName == it.annotationType.resolve().declaration.qualifiedName?.asString()
     }
 }
 
-fun KSAnnotation.fGetArgument(name: String): KSValueArgument? {
+internal fun KSAnnotation.fGetArgument(name: String): KSValueArgument? {
     return arguments.find {
         it.name?.asString() == name
     }
