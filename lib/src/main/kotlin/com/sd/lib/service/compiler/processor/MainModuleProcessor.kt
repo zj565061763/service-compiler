@@ -106,22 +106,6 @@ class MainModuleProcessor(
 
         fileSpec.writeTo(env.codeGenerator, Dependencies.ALL_FILES)
     }
-
-    companion object {
-        private var sIsLocked = false
-
-        internal fun lock() {
-            synchronized(this@Companion) {
-                sIsLocked = true
-            }
-        }
-
-        internal fun unlock() {
-            synchronized(this@Companion) {
-                sIsLocked = false
-            }
-        }
-    }
 }
 
 private fun KSClassDeclaration.getServiceInfo(): ServiceInfo? {

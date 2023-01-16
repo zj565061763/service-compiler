@@ -8,7 +8,6 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.validate
 import com.sd.lib.service.compiler.fIsAnnotationPresent
 import com.sd.lib.service.compiler.fReplaceDot
 import com.sd.lib.service.compiler.mapping.LibPackage
@@ -43,22 +42,16 @@ class FServiceImplProcessor(
     }
 
     override fun processImpl(resolver: Resolver): List<KSAnnotated> {
-        MainModuleProcessor.lock()
-
         val symbols = resolver.getSymbolsWithAnnotation(FServiceImpl.fullName).toList()
-        val ret = symbols.filter { !it.validate() }
-
         log("---------- $moduleName process symbols:${symbols.size} ----------")
-
         symbols.forEach {
-            if (it.validate() && it is KSClassDeclaration) {
+            if (it is KSClassDeclaration) {
                 findServiceInterface(it).also { service ->
                     addMapModule(service, it)
                 }
             }
         }
-
-        return ret
+        return listOf()
     }
 
     override fun errorImpl() {
@@ -76,7 +69,6 @@ class FServiceImplProcessor(
                 listImpl = item.value,
             )
         }
-        MainModuleProcessor.unlock()
     }
 
     private fun createModuleFile(
