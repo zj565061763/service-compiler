@@ -1,7 +1,7 @@
 package com.sd.demo.servicecompiler
 
-import com.sd.demo.service.app_common.LoginService
-import com.sd.demo.service.app_common.logMsg
+import com.sd.demo.servicecompiler.service.LoginService
+import com.sd.demo.servicecompiler.service.logMsg
 import com.sd.lib.service.FServiceImpl
 
 @FServiceImpl
