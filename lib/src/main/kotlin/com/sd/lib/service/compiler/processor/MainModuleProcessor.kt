@@ -53,18 +53,6 @@ class MainModuleProcessor(
         }
     }
 
-    override fun errorImpl() {
-        super.errorImpl()
-        log("---------- $moduleName error ----------")
-        _serviceHolder.clear()
-    }
-
-    override fun finishImpl() {
-        super.finishImpl()
-        log("---------- $moduleName finish ----------")
-        createFiles()
-    }
-
     private fun createFiles() {
         _serviceHolder.forEach { item ->
             createFinalFile(
@@ -105,6 +93,17 @@ class MainModuleProcessor(
             .build()
 
         fileSpec.writeTo(env.codeGenerator, true)
+    }
+
+    override fun errorImpl() {
+        super.errorImpl()
+        log("---------- $moduleName error ----------")
+    }
+
+    override fun finishImpl() {
+        super.finishImpl()
+        log("---------- $moduleName finish ----------")
+        createFiles()
     }
 }
 
