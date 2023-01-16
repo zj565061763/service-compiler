@@ -14,6 +14,8 @@ internal abstract class BaseProcessor(
     private val main: Boolean = false,
 ) : SymbolProcessor {
 
+    private var _resolver: Resolver? = null
+
     val moduleName: String
         get() {
             val moduleName = env.options[OptionsKeyModuleName]
@@ -24,11 +26,14 @@ internal abstract class BaseProcessor(
     private val isMainModule: Boolean
         get() = OptionsValueModuleMain == moduleName
 
+    val resolver: Resolver? get() = _resolver
+
     fun log(message: String, symbol: KSNode? = null) {
         env.logger.warn("$LibVersion ${javaClass.simpleName} $message", symbol)
     }
 
     final override fun process(resolver: Resolver): List<KSAnnotated> {
+        _resolver = resolver
         if (main && !isMainModule) return listOf()
         return processImpl(resolver)
     }
