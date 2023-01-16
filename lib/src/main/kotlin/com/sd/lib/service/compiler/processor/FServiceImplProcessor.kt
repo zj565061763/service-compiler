@@ -113,7 +113,7 @@ private fun findServiceInterface(source: KSClassDeclaration): KSClassDeclaration
     var current = source
     while (true) {
         val superInfo = current.getSuperInfo()
-        val interfaces = superInfo.second
+        val interfaces = superInfo.interfaces
         if (interfaces.isEmpty()) break
 
         for (item in interfaces) {
@@ -126,7 +126,7 @@ private fun findServiceInterface(source: KSClassDeclaration): KSClassDeclaration
             }
         }
 
-        current = superInfo.first ?: break
+        current = superInfo.parent ?: break
     }
 
     return checkNotNull(ret) {
@@ -134,17 +134,13 @@ private fun findServiceInterface(source: KSClassDeclaration): KSClassDeclaration
     }
 }
 
-private fun KSClassDeclaration.getSuperInfo(): Pair<KSClassDeclaration?, List<KSClassDeclaration>> {
-    val superTypes = superTypes.toList()
-    if (superTypes.isEmpty()) return (null to listOf())
-
+private fun KSClassDeclaration.getSuperInfo(): SuperInfo {
     var parent: KSClassDeclaration? = null
     val interfaces = mutableListOf<KSClassDeclaration>()
 
     for (item in superTypes) {
         val declaration = item.resolve().declaration
         if (declaration !is KSClassDeclaration) continue
-
         when (declaration.classKind) {
             ClassKind.CLASS -> {
                 check(parent == null)
@@ -154,6 +150,13 @@ private fun KSClassDeclaration.getSuperInfo(): Pair<KSClassDeclaration?, List<KS
             else -> {}
         }
     }
-
-    return (parent to interfaces)
+    return SuperInfo(
+        parent = parent,
+        interfaces = interfaces,
+    )
 }
+
+private data class SuperInfo(
+    val parent: KSClassDeclaration?,
+    val interfaces: List<KSClassDeclaration>,
+)
