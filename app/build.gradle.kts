@@ -6,7 +6,7 @@ plugins {
 dependencies {
     implementation(project(":app_common"))
     implementation(project(":feature_a"))
-    implementation(project(":app_module_b"))
+    implementation(project(":feature_b"))
     ksp(project(":lib"))
 }
 
