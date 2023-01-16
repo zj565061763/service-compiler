@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":app_service"))
-    ksp(project(":lib"))
+    ksp(project(":compiler"))
 }
 
 kotlin {

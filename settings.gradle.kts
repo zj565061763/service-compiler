@@ -16,4 +16,4 @@ rootProject.name = "service-compiler"
 include(":app")
 include(":app_feature")
 include(":app_service")
-include(":lib")
+include(":compiler")
