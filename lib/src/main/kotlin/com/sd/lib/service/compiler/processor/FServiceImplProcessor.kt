@@ -50,10 +50,10 @@ class FServiceImplProcessor(
 
         log("---------- $moduleName process symbols:${symbols.size} ----------")
 
-        symbols.forEach { annotated ->
-            if (annotated is KSClassDeclaration && annotated.validate()) {
-                findServiceInterface(annotated).also { service ->
-                    addMapModule(service, annotated)
+        symbols.forEach {
+            if (it.validate() && it is KSClassDeclaration) {
+                findServiceInterface(it).also { service ->
+                    addMapModule(service, it)
                 }
             }
         }
