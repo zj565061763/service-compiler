@@ -54,10 +54,10 @@ class MainModuleProcessor(
     }
 
     private fun createFiles() {
-        _serviceHolder.forEach { item ->
+        for ((key, value) in _serviceHolder) {
             createFinalFile(
-                service = item.key,
-                listImpl = item.value,
+                service = key,
+                listImpl = value,
             )
         }
     }
