@@ -65,7 +65,7 @@ internal class FServiceImplProcessor(
         service: KSClassDeclaration,
         listImpl: Set<KSClassDeclaration>,
     ) {
-        val filename = service.qualifiedName!!.asString().fReplaceDot() + "_$moduleName"
+        val filename = "${service.qualifiedName!!.asString().fReplaceDot()}_$moduleName"
         log("createFile $filename impl:${listImpl.size}")
 
         val typeSpec = TypeSpec.classBuilder(filename)
@@ -119,7 +119,7 @@ private fun findServiceInterface(source: KSClassDeclaration): KSClassDeclaration
                 if (ret == null) {
                     ret = item
                 } else {
-                    error("More than one service interface present in ${source.qualifiedName!!.asString()}")
+                    error("More than one service interface present in ${source.qualifiedName?.asString()}")
                 }
             }
         }
@@ -128,7 +128,7 @@ private fun findServiceInterface(source: KSClassDeclaration): KSClassDeclaration
     }
 
     return checkNotNull(ret) {
-        "Interface marked with annotation @${FService.simpleName} was not found in ${source.qualifiedName!!.asString()} super types"
+        "Interface marked with annotation @${FService.simpleName} was not found in ${source.qualifiedName?.asString()} super types"
     }
 }
 
