@@ -2,7 +2,7 @@ package com.sd.lib.service.compiler.mapping
 
 import com.squareup.kotlinpoet.ClassName
 
-internal open class LibClassMapping(
+internal open class LibClass(
     val simpleName: String,
 ) {
     val packageName: String = LibPackage.main
