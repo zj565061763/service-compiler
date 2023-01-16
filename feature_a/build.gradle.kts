@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":app_common"))
+    implementation(project(":service"))
     ksp(project(":lib"))
 }
 
