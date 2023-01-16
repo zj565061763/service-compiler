@@ -31,6 +31,7 @@ class FServiceImplProcessor(
 ) : BaseProcessor(env) {
 
     private val _serviceHolder: MutableMap<KSClassDeclaration, MutableSet<KSClassDeclaration>> = hashMapOf()
+    private val _createdHolder: MutableSet<KSClassDeclaration> = hashSetOf()
 
     override fun processImpl(resolver: Resolver): List<KSAnnotated> {
         val symbols = resolver.getSymbolsWithAnnotation(FServiceImpl.fullName).toList()
@@ -42,6 +43,7 @@ class FServiceImplProcessor(
                 }
             }
         }
+        createFiles()
         return listOf()
     }
 
@@ -54,24 +56,16 @@ class FServiceImplProcessor(
         }
     }
 
-    override fun errorImpl() {
-        super.errorImpl()
-        log("---------- $moduleName error ----------")
-    }
-
-    override fun finishImpl() {
-        super.finishImpl()
-        log("---------- $moduleName finish ----------")
-        createFiles()
-    }
-
     private fun createFiles() {
-        _serviceHolder.forEach { item ->
+        for ((key, value) in _serviceHolder) {
+            if (_createdHolder.contains(key)) continue
+            _createdHolder.add(key)
             createFile(
-                service = item.key,
-                listImpl = item.value,
+                service = key,
+                listImpl = value,
             )
         }
+        _serviceHolder.clear()
     }
 
     private fun createFile(
@@ -97,6 +91,16 @@ class FServiceImplProcessor(
             .build()
 
         fileSpec.writeTo(env.codeGenerator, true)
+    }
+
+    override fun errorImpl() {
+        super.errorImpl()
+        log("---------- $moduleName error ----------")
+    }
+
+    override fun finishImpl() {
+        super.finishImpl()
+        log("---------- $moduleName finish ----------")
     }
 }
 
