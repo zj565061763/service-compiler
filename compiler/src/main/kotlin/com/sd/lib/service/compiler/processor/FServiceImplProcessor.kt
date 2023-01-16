@@ -9,6 +9,7 @@ import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
+import com.sd.lib.service.compiler.className
 import com.sd.lib.service.compiler.fIsAnnotationPresent
 import com.sd.lib.service.compiler.fReplaceDot
 import com.sd.lib.service.compiler.mapping.LibPackage
@@ -74,7 +75,7 @@ internal class FServiceImplProcessor(
         val typeSpec = TypeSpec.classBuilder(filename)
             .addModifiers(KModifier.INTERNAL)
             .addAnnotation(
-                AnnotationSpec.builder(ModuleServiceInfo.className)
+                AnnotationSpec.builder(ModuleServiceInfo.className())
                     .addMember("module = %S", moduleName)
                     .addMember("service = %S", service.qualifiedName!!.asString())
                     .addMember("impl = %S", listImpl.joinToString(separator = ",") { it.qualifiedName!!.asString() })

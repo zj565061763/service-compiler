@@ -3,6 +3,8 @@ package com.sd.lib.service.compiler
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSValueArgument
+import com.sd.lib.service.compiler.mapping.LibClass
+import com.squareup.kotlinpoet.ClassName
 
 internal const val LibVersion = "1.0.0-alpha03"
 
@@ -27,4 +29,8 @@ internal fun KSAnnotation.fGetArgument(name: String): KSValueArgument? {
 
 internal fun String.fReplaceDot(): String {
     return this.replace(".", "_")
+}
+
+internal fun LibClass.className(): ClassName {
+    return ClassName(packageName, simpleName)
 }

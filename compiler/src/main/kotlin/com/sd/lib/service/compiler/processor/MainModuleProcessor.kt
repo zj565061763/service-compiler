@@ -3,6 +3,7 @@ package com.sd.lib.service.compiler.processor
 import com.google.devtools.ksp.*
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.*
+import com.sd.lib.service.compiler.className
 import com.sd.lib.service.compiler.fGetAnnotation
 import com.sd.lib.service.compiler.fGetArgument
 import com.sd.lib.service.compiler.fReplaceDot
@@ -71,7 +72,7 @@ internal class MainModuleProcessor(
 
         val typeSpec = TypeSpec.classBuilder(filename)
             .addModifiers(KModifier.INTERNAL)
-            .addSuperinterface(ServiceImplClassProvider.className)
+            .addSuperinterface(ServiceImplClassProvider.className())
             .addFunction(
                 FunSpec.builder("classes")
                     .addModifiers(KModifier.OVERRIDE)
@@ -110,17 +111,17 @@ internal class MainModuleProcessor(
 private fun KSClassDeclaration.getServiceInfo(): ServiceInfo? {
     val annotation = fGetAnnotation(ModuleServiceInfo.fullName) ?: return null
 
-    val module = annotation.fGetArgument("module") ?: error("member 'module' not found")
+    val module = annotation.fGetArgument(ModuleServiceInfo.module.name) ?: error("member '${ModuleServiceInfo.module}' not found")
     val moduleValue = (module.value?.toString() ?: "").also {
-        if (it.isEmpty()) error("member 'module' value is empty.")
+        if (it.isEmpty()) error("member '${ModuleServiceInfo.module}' value is empty.")
     }
 
-    val service = annotation.fGetArgument("service") ?: error("member 'service' not found")
+    val service = annotation.fGetArgument(ModuleServiceInfo.service.name) ?: error("member '${ModuleServiceInfo.service}' not found")
     val serviceValue = (service.value?.toString() ?: "").also {
-        if (it.isEmpty()) error("member 'service' value is empty")
+        if (it.isEmpty()) error("member '${ModuleServiceInfo.service}' value is empty")
     }
 
-    val impl = annotation.fGetArgument("impl") ?: error("member 'impl' not found")
+    val impl = annotation.fGetArgument(ModuleServiceInfo.impl.name) ?: error("member '${ModuleServiceInfo.impl}' not found")
     val implValue = impl.value?.toString() ?: ""
     if (implValue.isEmpty()) return null
 
