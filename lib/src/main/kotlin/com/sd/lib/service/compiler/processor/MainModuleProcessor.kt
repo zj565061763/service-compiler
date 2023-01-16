@@ -119,7 +119,6 @@ private fun KSClassDeclaration.getServiceInfo(): ServiceInfo? {
     val implValue = impl.value?.toString() ?: ""
     if (implValue.isEmpty()) return null
 
-    if (!implValue.contains(",")) return null
     val implNames = implValue.split(",").toSet()
     if (implNames.isEmpty()) return null
 
