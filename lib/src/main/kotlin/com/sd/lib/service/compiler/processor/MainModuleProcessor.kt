@@ -44,11 +44,9 @@ class MainModuleProcessor(
     }
 
     private fun addServiceFromModule(declaration: KSClassDeclaration) {
-        with(declaration.getServiceInfo()) {
-            first?.let { serviceName ->
-                log("add module ${declaration.simpleName.asString()} impl:${second.size}")
-                addService(serviceName, second)
-            }
+        declaration.getServiceInfo()?.let {
+            log("(${it.module}) (${it.service}) (impl:${it.implNames.size})")
+            addService(it.service, it.implNames)
         }
     }
 
@@ -114,17 +112,34 @@ class MainModuleProcessor(
     }
 }
 
-private fun KSClassDeclaration.getServiceInfo(): Pair<String?, Set<String>> {
-    val annotation = fGetAnnotation(ModuleServiceInfo.fullName) ?: return (null to setOf())
+private fun KSClassDeclaration.getServiceInfo(): ServiceInfo? {
+    val annotation = fGetAnnotation(ModuleServiceInfo.fullName) ?: return null
 
-    val serviceArgument = annotation.fGetValue("service") ?: error("member 'service' not found.")
-    val serviceArgumentValue = serviceArgument.value?.toString() ?: ""
-    if (serviceArgumentValue.isEmpty()) error("member 'service' value is empty.")
+    val module = annotation.fGetValue("module") ?: error("member 'module' not found.")
+    val moduleValue = module.value?.toString() ?: ""
+    if (moduleValue.isEmpty()) error("member 'module' value is empty.")
 
-    val implArgument = annotation.fGetValue("impl") ?: error("member 'impl' not found.")
-    val implArgumentValue = implArgument.value?.toString() ?: ""
-    if (implArgumentValue.isEmpty()) error("member 'impl' value is empty.")
+    val service = annotation.fGetValue("service") ?: error("member 'service' not found.")
+    val serviceValue = service.value?.toString() ?: ""
+    if (serviceValue.isEmpty()) error("member 'service' value is empty.")
 
-    val implNames = implArgumentValue.split(",").toSet()
-    return (serviceArgumentValue to implNames)
+    val impl = annotation.fGetValue("impl") ?: error("member 'impl' not found.")
+    val implValue = impl.value?.toString() ?: ""
+    if (implValue.isEmpty()) return null
+
+    if (!implValue.contains(",")) return null
+    val implNames = implValue.split(",").toSet()
+    if (implNames.isEmpty()) return null
+
+    return ServiceInfo(
+        module = moduleValue,
+        service = serviceValue,
+        implNames = implNames,
+    )
 }
+
+private data class ServiceInfo(
+    val module: String,
+    val service: String,
+    val implNames: Set<String>,
+)

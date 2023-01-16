@@ -87,6 +87,7 @@ class FServiceImplProcessor(
             .addModifiers(KModifier.INTERNAL)
             .addAnnotation(
                 AnnotationSpec.builder(ModuleServiceInfo.className)
+                    .addMember("module = %S", moduleName)
                     .addMember("service = %S", service.qualifiedName!!.asString())
                     .addMember("impl = %S", listImpl.joinToString(separator = ",") { it.qualifiedName!!.asString() })
                     .build()
