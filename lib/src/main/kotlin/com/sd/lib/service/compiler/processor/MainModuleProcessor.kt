@@ -104,7 +104,7 @@ class MainModuleProcessor(
             .addType(typeSpec)
             .build()
 
-        fileSpec.writeTo(env.codeGenerator, Dependencies.ALL_FILES)
+        fileSpec.writeTo(env.codeGenerator, true)
     }
 }
 
