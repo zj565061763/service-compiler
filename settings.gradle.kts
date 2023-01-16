@@ -14,7 +14,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "service-compiler"
 include(":app")
+include(":app_feature")
 include(":service")
-include(":feature_a")
-include(":feature_b")
 include(":lib")

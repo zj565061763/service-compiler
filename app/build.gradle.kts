@@ -5,8 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":service"))
-    implementation(project(":feature_a"))
-    implementation(project(":feature_b"))
+    implementation(project(":app_feature"))
     ksp(project(":lib"))
 }
 
