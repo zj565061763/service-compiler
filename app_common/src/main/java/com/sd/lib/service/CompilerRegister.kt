@@ -1,6 +1,6 @@
 package com.sd.lib.service
 
-@Retention(AnnotationRetention.SOURCE)
+@Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
 annotation class ModuleServiceInfo(
     val service: String,
