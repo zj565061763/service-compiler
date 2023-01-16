@@ -27,7 +27,7 @@ afterEvaluate {
                 from(components["java"])
                 groupId = "com.sd.lib.android"
                 artifactId = "service-compiler"
-                version = "1.0.0-alpha04"
+                version = "1.0.0-alpha05"
             }
         }
     }
