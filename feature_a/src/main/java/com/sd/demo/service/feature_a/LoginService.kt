@@ -1,4 +1,4 @@
-package com.sd.demo.service.app_module_a
+package com.sd.demo.service.feature_a
 
 import com.sd.demo.service.app_common.LoginService
 import com.sd.demo.service.app_common.logMsg
