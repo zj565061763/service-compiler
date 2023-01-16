@@ -29,6 +29,7 @@ internal class FServiceImplProcessor(
 ) : BaseProcessor(env) {
 
     private val _serviceHolder: MutableMap<KSClassDeclaration, MutableSet<KSClassDeclaration>> = hashMapOf()
+    private val _createdHolder: MutableSet<KSClassDeclaration> = hashSetOf()
 
     override fun processImpl(resolver: Resolver): List<KSAnnotated> {
         val symbols = resolver.getSymbolsWithAnnotation(FServiceImpl.fullName).toList()
@@ -40,6 +41,7 @@ internal class FServiceImplProcessor(
                 }
             }
         }
+        createFiles()
         return listOf()
     }
 
@@ -59,12 +61,16 @@ internal class FServiceImplProcessor(
                 listImpl = value,
             )
         }
+        _serviceHolder.clear()
     }
 
     private fun createFile(
         service: KSClassDeclaration,
         listImpl: Set<KSClassDeclaration>,
     ) {
+        if (_createdHolder.contains(service)) return
+        _createdHolder.add(service)
+
         val filename = "${service.qualifiedName!!.asString().fReplaceDot()}_$moduleName"
         log("createFile $filename impl:${listImpl.size}")
 
@@ -98,7 +104,6 @@ internal class FServiceImplProcessor(
     override fun finishImpl() {
         super.finishImpl()
         log("---------- $moduleName finish ----------")
-        createFiles()
     }
 }
 
