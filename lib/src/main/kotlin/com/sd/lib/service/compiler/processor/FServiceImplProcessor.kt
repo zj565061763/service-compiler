@@ -43,6 +43,8 @@ class FServiceImplProcessor(
     }
 
     override fun processImpl(resolver: Resolver): List<KSAnnotated> {
+        MainModuleProcessor.lock()
+
         val symbols = resolver.getSymbolsWithAnnotation(FServiceImpl.fullName).toList()
         val ret = symbols.filter { !it.validate() }
 
@@ -74,6 +76,7 @@ class FServiceImplProcessor(
                 listImpl = item.value,
             )
         }
+        MainModuleProcessor.unlock()
     }
 
     private fun createModuleFile(

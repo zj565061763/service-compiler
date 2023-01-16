@@ -10,7 +10,8 @@ import com.sd.lib.service.compiler.OptionsKeyModuleName
 import com.sd.lib.service.compiler.OptionsValueModuleMain
 
 abstract class BaseProcessor(
-    val env: SymbolProcessorEnvironment
+    val env: SymbolProcessorEnvironment,
+    private val main: Boolean = false,
 ) : SymbolProcessor {
 
     val moduleName: String
@@ -20,7 +21,7 @@ abstract class BaseProcessor(
             return moduleName
         }
 
-    val isMainModule: Boolean
+    private val isMainModule: Boolean
         get() = OptionsValueModuleMain == moduleName
 
     fun log(message: String, symbol: KSNode? = null) {
@@ -28,16 +29,19 @@ abstract class BaseProcessor(
     }
 
     final override fun process(resolver: Resolver): List<KSAnnotated> {
+        if (main && !isMainModule) return listOf()
         return processImpl(resolver)
     }
 
     final override fun onError() {
         super.onError()
+        if (main && !isMainModule) return
         errorImpl()
     }
 
     final override fun finish() {
         super.finish()
+        if (main && !isMainModule) return
         finishImpl()
     }
 

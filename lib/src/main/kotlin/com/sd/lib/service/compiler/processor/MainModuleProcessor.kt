@@ -21,14 +21,12 @@ class MainModuleProcessorProvider : SymbolProcessorProvider {
 
 class MainModuleProcessor(
     env: SymbolProcessorEnvironment
-) : BaseProcessor(env) {
+) : BaseProcessor(env, main = true) {
 
     private val _serviceHolder: MutableMap<String, MutableSet<String>> = hashMapOf()
 
     @OptIn(KspExperimental::class)
     override fun processImpl(resolver: Resolver): List<KSAnnotated> {
-        if (!isMainModule) return listOf()
-
         val symbols = resolver.getDeclarationsFromPackage(LibPackage.registerModule).toList()
         val ret = symbols.filter { !it.validate() }
 
@@ -61,14 +59,12 @@ class MainModuleProcessor(
 
     override fun errorImpl() {
         super.errorImpl()
-        if (!isMainModule) return
         log("---------- $moduleName error ----------")
         _serviceHolder.clear()
     }
 
     override fun finishImpl() {
         super.finishImpl()
-        if (!isMainModule) return
         log("---------- $moduleName finish ----------")
         _serviceHolder.forEach { item ->
             createFinalFile(
@@ -109,6 +105,22 @@ class MainModuleProcessor(
             .build()
 
         fileSpec.writeTo(env.codeGenerator, Dependencies.ALL_FILES)
+    }
+
+    companion object {
+        private var sIsLocked = false
+
+        internal fun lock() {
+            synchronized(this@Companion) {
+                sIsLocked = true
+            }
+        }
+
+        internal fun unlock() {
+            synchronized(this@Companion) {
+                sIsLocked = false
+            }
+        }
     }
 }
 
