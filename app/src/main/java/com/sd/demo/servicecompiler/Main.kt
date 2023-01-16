@@ -1,4 +1,4 @@
-package com.sd.demo.service.app
+package com.sd.demo.servicecompiler
 
 fun main() {
     println("hello")
