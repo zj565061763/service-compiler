@@ -45,12 +45,12 @@ internal class FServiceImplProcessor(
         return listOf()
     }
 
-    private fun addService(key: KSClassDeclaration, value: KSClassDeclaration) {
+    private fun addService(service: KSClassDeclaration, impl: KSClassDeclaration) {
         _serviceHolder.let { map ->
-            val holder = map[key] ?: hashSetOf<KSClassDeclaration>().also {
-                map[key] = it
+            val holder = map[service] ?: hashSetOf<KSClassDeclaration>().also {
+                map[service] = it
             }
-            holder.add(value)
+            holder.add(impl)
         }
     }
 
