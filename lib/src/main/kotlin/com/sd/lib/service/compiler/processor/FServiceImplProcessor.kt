@@ -63,20 +63,24 @@ class FServiceImplProcessor(
     override fun finishImpl() {
         super.finishImpl()
         log("---------- $moduleName finish ----------")
+        createModuleFiles()
+    }
+
+    private fun createModuleFiles() {
         _mapModule.forEach { item ->
-            createModuleFile(
+            createServiceFile(
                 service = item.key,
                 listImpl = item.value,
             )
         }
     }
 
-    private fun createModuleFile(
+    private fun createServiceFile(
         service: KSClassDeclaration,
         listImpl: Set<KSClassDeclaration>,
     ) {
         val filename = service.qualifiedName!!.asString().fReplaceDot() + "_$moduleName"
-        log("createModuleFile $filename impl:${listImpl.size}")
+        log("createServiceFile $filename impl:${listImpl.size}")
 
         val typeSpec = TypeSpec.classBuilder(filename)
             .addModifiers(KModifier.INTERNAL)
