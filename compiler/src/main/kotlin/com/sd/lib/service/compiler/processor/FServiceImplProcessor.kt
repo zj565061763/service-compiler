@@ -124,7 +124,7 @@ private fun findServiceInterface(source: KSClassDeclaration): KSClassDeclaration
                 if (ret == null) {
                     ret = item
                 } else {
-                    error("More than one service interface present in ${source.qualifiedName?.asString()}")
+                    error("More than one service interface present in ${source.qualifiedName?.asString()} : ${ret.qualifiedName?.asString()}, ${item.qualifiedName?.asString()}")
                 }
             }
         }
