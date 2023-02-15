@@ -20,7 +20,7 @@ class MainModuleProcessorProvider : SymbolProcessorProvider {
     }
 }
 
-internal class MainModuleProcessor(
+private class MainModuleProcessor(
     env: SymbolProcessorEnvironment
 ) : BaseProcessor(env, main = true) {
 
