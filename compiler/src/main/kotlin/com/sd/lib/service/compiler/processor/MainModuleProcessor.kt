@@ -81,13 +81,24 @@ private class MainModuleProcessor(
         val filename = service.fReplaceDot()
         log("createFinalFile $filename impl:${listImpl.size}")
 
-        val typeSpec = TypeSpec.classBuilder(filename).addModifiers(KModifier.INTERNAL).addSuperinterface(ServiceImplClassProvider.className())
-            .addFunction(FunSpec.builder("classes").addModifiers(KModifier.OVERRIDE).returns(LIST.parameterizedBy(STRING)).addCode("return listOf(\n").apply {
-                listImpl.forEach {
-                    addCode("  \"$it\"")
-                    addCode(",\n")
-                }
-            }.addCode(")").build()).build()
+        val typeSpec = TypeSpec.classBuilder(filename)
+            .addModifiers(KModifier.INTERNAL)
+            .addSuperinterface(ServiceImplClassProvider.className())
+            .addFunction(
+                FunSpec.builder("classes")
+                    .addModifiers(KModifier.OVERRIDE)
+                    .returns(LIST.parameterizedBy(STRING))
+                    .addCode("return listOf(\n")
+                    .apply {
+                        listImpl.forEach {
+                            addCode("  \"$it\"")
+                            addCode(",\n")
+                        }
+                    }
+                    .addCode(")")
+                    .build()
+            )
+            .build()
 
         val fileSpec = FileSpec.builder(LibPackage.register, filename).addType(typeSpec).build()
 
