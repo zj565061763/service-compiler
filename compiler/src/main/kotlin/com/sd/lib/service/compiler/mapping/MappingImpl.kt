@@ -1,13 +1,13 @@
 package com.sd.lib.service.compiler.mapping
 
-internal object FService : LibClass(simpleName = "FService")
+internal object FService : LibClass("FService")
 
 internal object FServiceImpl : LibClass("FServiceImpl")
 
 internal object ModuleServiceInfo : LibClass("ModuleServiceInfo") {
-    val module = LibProperty(name = "module")
-    val service = LibProperty(name = "service")
-    val impl = LibProperty(name = "impl")
+    val module = LibProperty("module")
+    val service = LibProperty("service")
+    val impl = LibProperty("impl")
 }
 
-internal object ServiceImplClassProvider : LibClass(simpleName = "ServiceImplClassProvider")
+internal object ServiceImplClassProvider : LibClass("ServiceImplClassProvider")
