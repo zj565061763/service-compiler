@@ -139,7 +139,7 @@ private fun findServiceInterface(source: KSClassDeclaration): KSClassDeclaration
 
 private fun KSClassDeclaration.getSuperInfo(): SuperInfo {
     var parent: KSClassDeclaration? = null
-    val interfaces = mutableListOf<KSClassDeclaration>()
+    val interfaces = hashSetOf<KSClassDeclaration>()
 
     for (item in superTypes) {
         val declaration = item.resolve().declaration
@@ -161,5 +161,5 @@ private fun KSClassDeclaration.getSuperInfo(): SuperInfo {
 
 private data class SuperInfo(
     val parent: KSClassDeclaration?,
-    val interfaces: List<KSClassDeclaration>,
+    val interfaces: Collection<KSClassDeclaration>,
 )
