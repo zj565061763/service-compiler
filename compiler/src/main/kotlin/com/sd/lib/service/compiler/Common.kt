@@ -4,7 +4,7 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSValueArgument
 
-internal const val LibVersion = "1.0.0-alpha10"
+internal const val LibVersion = "1.0.0-alpha11"
 
 const val OptionsKeyModuleName = "FSERVICE_MODULE_NAME"
 const val OptionsValueModuleMain = "FSERVICE_MODULE_MAIN"
